@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- Database Dialect -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+
+        <!-- Database Connection Settings -->
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/company</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password">root</property>
+
+        <!-- Automatic Schema Generation -->
+        <property name="hbm2ddl.auto">update</property>
+
+        <!-- SQL Output Settings -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+        <property name="hibernate.use_sql_comments">true</property>
+        <property name="hibernate.globally_quoted_identifiers">true</property>
+        <property name="hibernate.type_registry_sql_supports_comments">true</property>
+
+        <!-- Debugging and Performance Monitoring -->
+        <property name="hibernate.generate_statistics">true</property>
+        <property name="hibernate.debug_pretty_print_stacktrace">true</property>
+        <property name="hibernate.template_check_timeout">3000</property>
+
+        <!-- JDBC Metadata Defaults -->
+        <property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+		
+
+        <!-- Connection Pooling Configuration -->
+        <property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.timeout">1800</property>
+        <property name="hibernate.c3p0.max_statements">50</property>
+        <property name="hibernate.c3p0.idle_test_period">3000</property>
+        <property name="hibernate.c3p0.test_connection_on_checkout">true</property>
+        <property name="hibernate.c3p0.preferredTestQuery">SELECT 1;</property>
+        <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
+
+        <!-- Mapping Configuration -->
+        <mapping class="com.acejobber.chatserver.Entity.Message" />
+		<mapping class="com.acejobber.chatserver.Entity.MessageInbox" />
+        <mapping class="com.acejobber.chatserver.Entity.Conversation" />
+        <mapping class="com.acejobber.chatserver.MainService.ChatEntity" />
+
+    </session-factory>
+</hibernate-configuration>
