@@ -27,14 +27,16 @@ public class Conversation {
     private Long cid;
 
     @Column
-    private Long receiverId; //JobberId
+    private Long receiverId; 
 
     @Column
-    private Long senderId; //userId
+    private Long senderId; 
+
+    @Column
+    private Long jobId;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "conversation", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageInbox> inboxes;
-    
     
 }

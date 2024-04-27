@@ -1,7 +1,7 @@
 package com.acejobber.chatserver.DAO;
 
 import com.acejobber.chatserver.Entity.Conversation;
-import com.acejobber.chatserver.Repository.ConversationRepository;
+import com.acejobber.chatserver.Services.ConversationService;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -37,7 +37,7 @@ public class ConversationDaoTest {
 
 
     @InjectMocks
-    private ConversationRepository conversationDao;
+    private ConversationService conversationDao;
 
     @SuppressWarnings("deprecation")
     @BeforeEach
