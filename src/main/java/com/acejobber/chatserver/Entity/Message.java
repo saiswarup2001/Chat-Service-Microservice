@@ -1,6 +1,8 @@
 package com.acejobber.chatserver.Entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,7 +20,7 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
+public class Message implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,30 +28,46 @@ public class Message {
     @Column(name = "mid")
     private Long mid;
 
-    @Column
-    private boolean readMarker;
+    @Column(name = "status")
+    private boolean status;
 
-    @Column
-    private boolean deliveryMarker;
+    @Lob
+    @Column(name = "file_data")
+    private byte[] fileData;
 
-    @Column
+    @Column(name = "sender_id")
     private Long senderId;
 
-    @Column
+    @Column(name = "receiver_id")
     private Long receiverId;
 
-    @Column
+    @Column(name = "content")
     private String content;
 
+    @Lob
     @Column(name = "image")
     private byte[] image;
 
-    @JsonBackReference 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inbox_id")
+    @JsonBackReference
     private MessageInbox inbox;
 
-    public byte[] getImage() {
-        return image;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Message)) return false;
+        Message message = (Message) o;
+        return isStatus() == message.isStatus() &&
+                Objects.equals(getFileData(), message.getFileData()) &&
+                Objects.equals(getSenderId(), message.getSenderId()) &&
+                Objects.equals(getReceiverId(), message.getReceiverId()) &&
+                Objects.equals(getContent(), message.getContent()) &&
+                Objects.equals(getImage(), message.getImage());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isStatus(), getFileData(), getSenderId(), getReceiverId(), getContent(), getImage());
     }
 }

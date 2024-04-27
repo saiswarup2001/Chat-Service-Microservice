@@ -39,9 +39,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.acejobber.chatserver.Entity.Conversation;
 import com.acejobber.chatserver.Entity.Message;
 import com.acejobber.chatserver.Entity.MessageInbox;
-import com.acejobber.chatserver.Repository.ConversationRepository;
-import com.acejobber.chatserver.Repository.InboxRepository;
-import com.acejobber.chatserver.Repository.MessageRepository;
+import com.acejobber.chatserver.Services.ConversationService;
+import com.acejobber.chatserver.Services.InboxService;
+import com.acejobber.chatserver.Services.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 // @RunWith(SpringRunner.class)
@@ -50,13 +50,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class MessageControllerTest {
 
     @Mock
-    private MessageRepository messageDao;
+    private MessageService messageService;
 
     @Mock
-    private InboxRepository inboxDao;
+    private InboxService inboxService;
 
     @Mock
-    private ConversationRepository conversationDao;
+    private ConversationService conversationService;
 
     @InjectMocks
     private MessageController messageController;
@@ -80,12 +80,12 @@ public class MessageControllerTest {
     @Test
     public void testCreateMessage() throws Exception {
         // Arrange
-        Message message = new Message(1L, false, false, 10L, 20L, "Hello World", null, null);
+        Message message = new Message(1L, false, null, 10L, 20L, "Hello World", null, null);
 
         // ResponseEntity responseEntity = new ResponseEntity(message, HttpStatus.CREATED);
         // when(messageController.createMessage(message)).thenReturn(responseEntity);
 
-        doNothing().when(messageDao).saveMessage(message);
+        doNothing().when(messageService).saveMessage(message);
 
         // Act
         mockMvc.perform(post("/api/message/create")
@@ -98,7 +98,7 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$.content").value(message.getContent()));
 
         // Verification
-        verify(messageDao, times(1)).saveMessage(message);
+        verify(messageService, times(1)).saveMessage(message);
     }
 
     // =========== Get All Message Testing ============
@@ -106,10 +106,10 @@ public class MessageControllerTest {
     public void testGetAllMessages() throws Exception {
         // Arrange
         List<Message> messages = new ArrayList<>();
-        messages.add(new Message(1L, false, false, 10L, 20L, "Hello World", null, null));
-        messages.add(new Message(2L, false, false, 11L, 12L, "This is a test message", null, null));
+        messages.add(new Message(1L, false, null, 10L, 20L, "Hello World", null, null));
+        messages.add(new Message(2L, false, null, 11L, 12L, "This is a test message", null, null));
 
-        when(messageDao.findAllMessage()).thenReturn(messages);
+        when(messageService.findAllMessage()).thenReturn(messages);
 
         // Act
         mockMvc.perform(get("/api/message/getAll"))
@@ -120,7 +120,7 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$[1].content").value("This is a test message"));
 
         // Verification
-        verify(messageDao, times(1)).findAllMessage();
+        verify(messageService, times(1)).findAllMessage();
     }
 
     // ============= Getting Message by Id Test =================
@@ -128,8 +128,8 @@ public class MessageControllerTest {
     public void testgetMessageById() throws Exception {
         // Arrange
         Long id = 1L;
-        Message message = new Message(id, false, false, 10L, 11L, "Test Message byID", null, null);
-        when(messageDao.findMessageById(id)).thenReturn((Message) message);
+        Message message = new Message(id, false, null, 10L, 11L, "Test Message byID", null, null);
+        when(messageService.findMessageById(id)).thenReturn((Message) message);
 
         // Act
         mockMvc.perform(get("/api/message/{id}", id))
@@ -140,7 +140,7 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$.receiverId").value(11L));
 
         // Verification
-        verify(messageDao, times(1)).findMessageById(id);
+        verify(messageService, times(1)).findMessageById(id);
     }
 
     // ============ If message not found by the id ========================
@@ -148,7 +148,7 @@ public class MessageControllerTest {
     public void testgetMessageById_NotFound() {
         // Arrange
         Long id = 1000L;
-        when(messageDao.findMessageById(id)).thenReturn(null);
+        when(messageService.findMessageById(id)).thenReturn(null);
 
         // Act and Assert
         try {
@@ -160,7 +160,7 @@ public class MessageControllerTest {
         }
 
         // Verification
-        verify(messageDao, times(1)).findMessageById(id);
+        verify(messageService, times(1)).findMessageById(id);
     }
 
     // ============= Save Image Testing using message Id =================
@@ -171,8 +171,8 @@ public class MessageControllerTest {
         byte[] image = "test image data".getBytes();
 
         // when(messageDao.saveImage(id, image)).thenReturn(true);
-        doNothing().when(messageDao).saveImagebyMessageId(id, image);
-        when(messageDao.findMessageById(id)).thenReturn(new Message(id, false, false, 10L, 20L, "Hello World", null, null));
+        doNothing().when(messageService).saveImagebyMessageId(id, image);
+        when(messageService.findMessageById(id)).thenReturn(new Message(id, false, null, 10L, 20L, "Hello World", null, null));
 
         // Act using api
         mockMvc.perform(post("/api/message/saveImage/{id}", id)
@@ -183,8 +183,8 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$.content").value("Hello World"));
 
         // Verification
-        verify(messageDao, times(1)).saveImagebyMessageId(id, image);
-        verify(messageDao, times(1)).findMessageById(id);
+        verify(messageService, times(1)).saveImagebyMessageId(id, image);
+        verify(messageService, times(1)).findMessageById(id);
     }
 
     // ========= Getting Image using message Id =================
@@ -193,7 +193,7 @@ public class MessageControllerTest {
         // Arrange
         Long id = 1L;
         byte[] imageData = "some image data".getBytes();
-        when(messageDao.getImagebyMessageId(id)).thenReturn(Optional.of(imageData));
+        when(messageService.getImagebyMessageId(id)).thenReturn(Optional.of(imageData));
 
         // Act
         mockMvc.perform(get("/api/message/getImage/{id}", id))
@@ -203,7 +203,7 @@ public class MessageControllerTest {
                 .andExpect(content().bytes(imageData));
 
         // Verification
-        verify(messageDao, times(1)).getImagebyMessageId(id);
+        verify(messageService, times(1)).getImagebyMessageId(id);
     }
 
     // ==== creating the inbox ===
@@ -218,7 +218,7 @@ public class MessageControllerTest {
         messageInbox.setSenderId(2L);
 
         // Mock the save behavior of InboxService
-        doNothing().when(inboxDao).saveInbox(messageInbox);
+        doNothing().when(inboxService).saveInbox(messageInbox);
 
         // Perform POST request to controller endpoint
         mockMvc.perform(post("/api/inbox/create")
@@ -227,7 +227,7 @@ public class MessageControllerTest {
                 .andExpect(status().isCreated()); // Expect HTTP 201 Created
 
         // Verify that the save method of InboxService was called
-        verify(inboxDao).saveInbox(messageInbox);
+        verify(inboxService).saveInbox(messageInbox);
     }
 
     // ==== Get the inbox through inbox id===
@@ -237,8 +237,8 @@ public class MessageControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(messageController).build();
 
         List<Message> messages = new ArrayList<>();
-        messages.add(new Message(1L, false, false, 10L, 20L, "Hello World", null, null));
-        messages.add(new Message(2L, false, false, 11L, 12L, "This is a test message", null, null));
+        messages.add(new Message(1L, false, null, 10L, 20L, "Hello World", null, null));
+        messages.add(new Message(2L, false, null, 11L, 12L, "This is a test message", null, null));
 
         // Prepare test data
         Long id = 1L;
@@ -249,7 +249,7 @@ public class MessageControllerTest {
         messageInbox.setMessages(messages);
 
         // Mock the findById behavior of InboxService
-        when(inboxDao.findInboxById(id)).thenReturn(messageInbox);
+        when(inboxService.findInboxById(id)).thenReturn(messageInbox);
 
         // Perform GET request to controller endpoint
         mockMvc.perform(get("/api/inbox/{id}", id))
@@ -260,7 +260,7 @@ public class MessageControllerTest {
 
         // Verify that the findById method of InboxService was called with the specified
         // id
-        verify(inboxDao).findInboxById(id);
+        verify(inboxService).findInboxById(id);
     }
 
     // ==== Getting all the inbox ===
@@ -270,12 +270,12 @@ public class MessageControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(messageController).build();
 
         List<Message> messages1 = new ArrayList<>();
-        messages1.add(new Message(1L, false, false, 10L, 20L, "Hello World", null, null));
-        messages1.add(new Message(2L, false, false, 11L, 12L, "This is a test message", null, null));
+        messages1.add(new Message(1L, false, null, 10L, 20L, "Hello World", null, null));
+        messages1.add(new Message(2L, false, null, 11L, 12L, "This is a test message", null, null));
 
         List<Message> messages2 = new ArrayList<>();
-        messages2.add(new Message(3L, false, false, 100L, 200L, "Hello World", null, null));
-        messages2.add(new Message(4L, false, false, 101L, 102L, "This is a test message", null, null));
+        messages2.add(new Message(3L, false, null, 100L, 200L, "Hello World", null, null));
+        messages2.add(new Message(4L, false, null, 101L, 102L, "This is a test message", null, null));
         // Prepare test data
         List<MessageInbox> inboxList = new ArrayList<>();
         MessageInbox inbox1 = new MessageInbox();
@@ -292,7 +292,7 @@ public class MessageControllerTest {
         inbox2.setMessages(messages2);
 
         // Mock the findAll behavior of InboxService
-        when(inboxDao.findAllInboxes()).thenReturn(inboxList);
+        when(inboxService.findAllInboxes()).thenReturn(inboxList);
 
         // Perform GET request to controller endpoint
         mockMvc.perform(get("/api/inbox/all"))
@@ -306,7 +306,7 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$[1].senderId").value(inbox2.getSenderId()));
 
         // Verify that the findAll method of InboxService was called
-        verify(inboxDao).findAllInboxes();
+        verify(inboxService).findAllInboxes();
     }
 
     // ========= Creating Conversation Test ========
@@ -331,25 +331,26 @@ public class MessageControllerTest {
         // Create a sample Conversation object
         Conversation conversation = new Conversation();
         conversation.setCid(id);
+        conversation.setJobId(1L);
         conversation.setSenderId(10L);
         conversation.setReceiverId(11L);
         conversation.setInboxes(inboxList);
 
         // Mock the save behavior of ConversationDao
-        doNothing().when(conversationDao).saveConversation(ArgumentMatchers.any(Conversation.class));
+        doNothing().when(conversationService).saveConversation(ArgumentMatchers.any(Conversation.class));
 
         // Perform POST request to controller endpoint
         mockMvc.perform(MockMvcRequestBuilders.post("/api/convo/create")
                 .contentType("application/json")
                 .content(
-                        "{ \"cid\": 1, \"senderId\": 10, \"receiverId\": 11, \"inboxes\": [{ \"id\": 1, \"senderId\": 2, \"receiverId\": 1 }, { \"id\": 2, \"senderId\": 4, \"receiverId\": 3 }] }"))
+                        "{ \"cid\": 1, \"senderId\": 10, \"receiverId\": 11, \"JobId\": 1, \"inboxes\": [{ \"id\": 1, \"senderId\": 2, \"receiverId\": 1 }, { \"id\": 2, \"senderId\": 4, \"receiverId\": 3 }] }"))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.cid").value(id))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.senderId").value(10L))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.receiverId").value(11L));
 
         // Verify that the save method of ConversationDao was called
-        verify(conversationDao).saveConversation(ArgumentMatchers.any(Conversation.class));
+        verify(conversationService).saveConversation(ArgumentMatchers.any(Conversation.class));
     }
 
     // ===== get Message conversation by conversation Id ============
@@ -357,21 +358,22 @@ public class MessageControllerTest {
     public void testGetConversationById_Found() throws Exception {
         // Test data
         Long conversationId = 1L;
-        Conversation conversation = new Conversation(conversationId, 10L, 11L, null);
+        Conversation conversation = new Conversation(conversationId, 10L, 11L, 1L, null);
 
         // Mock ConversationService findById behavior
-        Mockito.when(conversationDao.findMessageByConversationId(conversationId)).thenReturn(conversation);
+        Mockito.when(conversationService.findMessageByConversationId(conversationId)).thenReturn(conversation);
 
         // Perform endpoint
         mockMvc.perform(get("/api/convo/{id}", conversationId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.cid").value(conversationId))
+                // .andExpect(jsonPath("$.JobId").value(1L))
                 .andExpect(jsonPath("$.senderId").value(11L))
                 .andExpect(jsonPath("$.receiverId").value(10L));
 
         // Verify that ConversationService findById was called with the correct argument
-        Mockito.verify(conversationDao).findMessageByConversationId(conversationId);
+        Mockito.verify(conversationService).findMessageByConversationId(conversationId);
     }
 
     // ======= Get all coversation ==============
@@ -379,12 +381,12 @@ public class MessageControllerTest {
     public void testGetAllConversations() throws Exception {
         // Prepare test data
         List<Message> messages1 = new ArrayList<>();
-        messages1.add(new Message(1L, false, false, 10L, 20L, "Hello World", null, null));
-        messages1.add(new Message(2L, false, false, 11L, 12L, "This is a test message", null, null));
+        messages1.add(new Message(1L, false, null, 10L, 20L, "Hello World", null, null));
+        messages1.add(new Message(2L, false, null, 11L, 12L, "This is a test message", null, null));
 
         List<Message> messages2 = new ArrayList<>();
-        messages2.add(new Message(3L, false, false, 100L, 200L, "Hello World", null, null));
-        messages2.add(new Message(4L, false, false, 101L, 102L, "This is a test message", null, null));
+        messages2.add(new Message(3L, false, null, 100L, 200L, "Hello World", null, null));
+        messages2.add(new Message(4L, true, null, 101L, 102L, "This is a test message", null, null));
 
         List<MessageInbox> inboxList1 = new ArrayList<>();
         MessageInbox inbox1 = new MessageInbox();
@@ -419,11 +421,11 @@ public class MessageControllerTest {
         inboxList2.add(inbox4);
 
         List<Conversation> conversations = new ArrayList<>();
-        conversations.add(new Conversation(1L, 10L, 11L, inboxList1));
-        conversations.add(new Conversation(2L, 12L, 13L, inboxList2));
+        conversations.add(new Conversation(1L, 10L, 11L, 1L, inboxList1));
+        conversations.add(new Conversation(2L, 12L, 13L, 2L, inboxList2));
 
         // Mock ConversationService findAll behavior
-        Mockito.when(conversationDao.findAllconversation()).thenReturn(conversations);
+        Mockito.when(conversationService.findAllconversation()).thenReturn(conversations);
 
         // Perform GET request to controller endpoint
         mockMvc.perform(get("/api/convo"))
@@ -442,6 +444,6 @@ public class MessageControllerTest {
                 .andExpect(jsonPath("$[0].inboxes[0].messages[0].content").value("Hello World"));
 
         // Verify that ConversationService findAll was called
-        Mockito.verify(conversationDao).findAllconversation();
+        Mockito.verify(conversationService).findAllconversation();
     }
 }

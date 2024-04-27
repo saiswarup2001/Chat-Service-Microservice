@@ -1,7 +1,7 @@
 package com.acejobber.chatserver.DAO;
 
 import com.acejobber.chatserver.Entity.Message;
-import com.acejobber.chatserver.Repository.MessageRepository;
+import com.acejobber.chatserver.Services.MessageService;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -28,16 +28,16 @@ import static org.mockito.Mockito.*;
 public class MessageDaoTest {
 
     @Mock
-    private SessionFactory sessionFactory; // Mock the Hibernate SessionFactory
+    private SessionFactory sessionFactory; 
 
     @Mock
-    private Session session; // Mock the Hibernate Session
+    private Session session; 
 
     @Mock
-    private Transaction transaction; // Mock the Hibernate Transaction
+    private Transaction transaction; 
 
     @InjectMocks
-    private MessageRepository messageDao; // The DAO to be tested
+    private MessageService messageService; 
 
     @SuppressWarnings("deprecation")
     @BeforeEach
@@ -57,7 +57,7 @@ public class MessageDaoTest {
         message.setContent("Hello");
 
         // Call the DAO method
-        messageDao.saveMessage(message);
+        messageService.saveMessage(message);
 
         // Verify that session.save and transaction.commit were called
         verify(session, times(1)).persist(message);
@@ -80,7 +80,7 @@ public class MessageDaoTest {
         when(query.list()).thenReturn(messages);
 
         // Call the DAO method
-        List<Message> result = messageDao.findAllMessage();
+        List<Message> result = messageService.findAllMessage();
 
         // Verify the result
         assertEquals(messages.size(), result.size());
@@ -101,7 +101,7 @@ public class MessageDaoTest {
         when(session.get(Message.class, messageId)).thenReturn(message);
 
         // Call the DAO method
-        Optional<byte[]> result = messageDao.getImagebyMessageId(messageId);
+        Optional<byte[]> result = messageService.getImagebyMessageId(messageId);
 
         // Verify the result
         assertTrue(result.isPresent());
@@ -121,7 +121,7 @@ public class MessageDaoTest {
         when(session.get(Message.class, messageId)).thenReturn(message);
 
         // Call the DAO method
-        messageDao.saveImagebyMessageId(messageId, imageData);
+        messageService.saveImagebyMessageId(messageId, imageData);
 
         // Verify 
         verify(session).update(message); 
@@ -142,7 +142,7 @@ public class MessageDaoTest {
         when(session.get(Message.class, messageId)).thenReturn(expectedMessage);
 
         // Call the DAO method
-        Message result = messageDao.findMessageById(messageId);
+        Message result = messageService.findMessageById(messageId);
 
         // assert and Verify the result
         assertNotNull(result);
