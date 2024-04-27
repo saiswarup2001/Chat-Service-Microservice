@@ -1,7 +1,7 @@
 package com.acejobber.chatserver.DAO;
 
 import com.acejobber.chatserver.Entity.MessageInbox;
-import com.acejobber.chatserver.Repository.InboxRepository;
+import com.acejobber.chatserver.Services.InboxService;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -35,7 +35,7 @@ public class InboxDaoTest {
     private Query<MessageInbox> query;
 
     @InjectMocks
-    private InboxRepository inboxDao;
+    private InboxService inboxDao;
 
     @SuppressWarnings("deprecation")
     @BeforeEach

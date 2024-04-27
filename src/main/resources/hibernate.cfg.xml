@@ -47,7 +47,6 @@
         <mapping class="com.acejobber.chatserver.Entity.Message" />
 		<mapping class="com.acejobber.chatserver.Entity.MessageInbox" />
         <mapping class="com.acejobber.chatserver.Entity.Conversation" />
-        <mapping class="com.acejobber.chatserver.MainService.ChatEntity" />
 
     </session-factory>
 </hibernate-configuration>
